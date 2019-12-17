@@ -81,5 +81,11 @@
             "allow-contrib": false,
             "require": "4.4.*"
         }
+    },
+    "repositories": {
+        "phpunit-bridge": {
+            "type": "path",
+            "url": "C:\\wamp64\\www\\projetsymfony\\vendor\\symfony\\phpunit-bridge"
+        }
     }
 }

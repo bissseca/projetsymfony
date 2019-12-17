@@ -2,6 +2,9 @@
 
 namespace App\Controller;
 
+use App\CRUD\Blog\AuteurCRUD;
+use App\Entity\Auteur;
+use App\Form\Blog\AuteurFormType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,79 +18,111 @@ class AuthorController extends AbstractController
 
 {
     /**
+     * @param AuteurCRUD $auteurCRUD
      * @param $id
      * @return Response
-     * @Route("/blog/author/{id}", name="blog_article_id")
+     * @Route("/blog/author/id/{id}", name="blog_author_id")
      */
-    function ShowOneAuthorId($id, Request $request)
+    public function showOneAuteurId(AuteurCRUD $auteurCRUD, $id)
     {
-        $response = new Response();
-        $content = "<html><body>AuthorId = $id</body></html>";
-        $response->setContent($content);
-        $response->setStatusCode(200);
-
-        return $response;
+        /**
+         * @var Auteur $auteur
+         */
+        $auteur = $auteurCRUD->getOneByID($id);
+        return $this->render("/blog/author/one.html.twig", ['auteur' => $auteur]);
     }
 
     /**
-     * @param Request $request
+     * @param Auteur $auteur
      * @return Response
      * @Route("/blog/author", name="liste_auteur")
      */
-    public function ShowAllAuthor(Request $request)
+    public function showAllAuthor(Request $request, AuteurCRUD $auteurCRUD)
     {
-        $response = new Response();
-        $content = "<html><body>Liste des articles</body></html>";
-        $response->setContent($content);
-        $response->setStatusCode(200);
-
-        return $response;
+        $auteurs = $auteurCRUD->getAll();
+        return $this->render("/blog/author/all.html.twig", ['auteurs' => $auteurs]);
     }
 
     /**
      * @param Request $request
-     * @return Response
-     * @Route("/blog/author/update", name="auteur_update")
+     * @param AuteurCRUD $auteurCRUD
+     * @param $id
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     * @Route("/blog/author/update/{id}", name="auteur_update")
      */
-    public function UpdateArticle(Request $request)
+    public function updateAuteur(Request $request, AuteurCRUD $auteurCRUD, $id)
     {
-        $response = new Response();
-        $content = "<html><body>Editer l'article</body></html></body>";
-        $response->setContent($content);
-        $response->setStatusCode(200);
+        //Get auteur
+        $auteur = $auteurCRUD->getOneByID($id);
+        // create form
+        $form = $this->createForm(
+            AuteurFormType::class,
+            $auteur
+        );
+        // Handle form = submit
+        $form->handleRequest($request);
 
-        return $response;
+        //Treat submitted form
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Persist
+            $auteurCRUD->update($auteur);
+
+            //redirect
+            return $this->redirectToRoute('liste_auteur', ['id' => $id]);
+        }
+        // create and return template
+        return $this->render("/blog/author/update.html.twig", ['auteurForm' => $form->createView()]
+        );
     }
 
     /**
      * @param Request $request
-     * @return Response
-     * @Route("/blog/author/delete", name="auteur_edit")
+     * @param AuteurCRUD $auteurCRUD
+     * @param $id
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @Route("/blog/author/delete/{id}", name="auteur_delete")
      */
-    public function DeleteArticle(Request $request)
+    public function deleteAuteur(Request $request, AuteurCRUD $auteurCRUD, $id)
     {
-        $response = new Response();
-        $content = "<htm><body>Supprimer l'article<html></body>";
-        $response-> setContent($content);
-        $response->setStatusCode(200);
-
-        return $response;
+        //Get auteur
+        $auteur = $auteurCRUD->getOneByID($id);
+        //Delete
+        $auteurCRUD->delete($auteur);
+        //redirect
+        return $this->redirectToRoute('liste_auteur');
     }
 
     /**
      * @param Request $request
+     * @param AuteurCRUD $auteurCRUD
      * @return Response
      * @Route("/blog/author/create", name="auteur_create")
      */
-
-    public function createArticle(Request $request)
+    public function createAuteur(Request $request, AuteurCRUD $auteurCRUD)
     {
-        $response = new Response();
-        $content = "<htm><body>Creer l'article<html></body>";
-        $response-> setContent($content);
-        $response->setStatusCode(200);
+        // create empty auteur
+        $auteur = new Auteur();
+        // create form
+        $form = $this->createForm(
+            AuteurFormType::class,
+            $auteur
+        );
+        // Handle form = submit
+        $form->handleRequest($request);
 
-        return $response;
+        //Treat submitted form
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Persist
+            $auteurCRUD->add($auteur);
+
+            //redirect
+            return $this->redirectToRoute('liste_auteur');
+        }
+        // create and return template
+        return $this->render("/blog/author/create.html.twig",
+            [
+                'auteurForm' => $form->createView()
+            ]
+        );
     }
-
 }

@@ -1,0 +1,8 @@
+{% extends 'base.html.twig' %}
+{%block content%}
+    <ul>
+        {% for auteur in auteurs %}
+         <center><li>{{ auteur.id }}.{{ auteur.lastname }}  {{ auteur.firstname }}</li>
+        {% endfor %}
+    </ul></center>
+{% endblock %}

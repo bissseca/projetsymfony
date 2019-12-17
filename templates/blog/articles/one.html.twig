@@ -1,0 +1,8 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+
+            {{ article.id }}
+            {{ article.title }}
+            {{ article.content }}
+        {{ article.date | date("d/m/y - H:i:s")}}{% endblock %}
